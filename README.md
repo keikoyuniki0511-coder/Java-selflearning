@@ -1,2 +1,112 @@
 # Java-selflearning
 Record some of my questions.
+
+# Java 学习笔记：`private`、`static`、`final`
+
+这三个修饰符解决的是三个不同的问题：
+
+| 修饰符 | 关注点 | 一句话理解 |
+| `private` | 谁可以访问 | 只允许当前类内部使用 |
+| `static` | 属于谁 | 属于类，所有对象共享 |
+| `final` | 能否改变或扩展 | 不能再修改、重写或继承（取决于修饰目标） |
+
+## 1. `private`：保护数据
+
+`private` 成员只能在定义它的类内部访问。它常用于隐藏字段，避免外部代码绕过校验、随意修改数据。
+
+```java
+public class BankAccount {
+    private double balance;
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+        }
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+}
+```
+
+外部代码不能写 `account.balance = -100;`，而应通过 `deposit()` 等公开方法操作数据。
+
+## 2. `static`：类共享的成员
+
+`static` 成员属于类本身，不属于某一个对象。所有对象共享同一份静态变量；静态方法可直接通过类名调用。
+
+```java
+public class Person {
+    String name;                       // 每个对象各有一份
+    static String country = "China";   // 所有 Person 对象共享
+
+    static void showCountry() {
+        System.out.println(country);
+    }
+}
+
+Person p1 = new Person();
+Person p2 = new Person();
+p1.name = "Tom";
+p2.name = "Jerry";
+
+Person.country = "China";
+Person.showCountry();
+```
+
+建议使用 `Person.country`、`Person.showCountry()` 访问静态成员，而不是通过对象访问。
+
+> 注意：静态方法没有 `this`，不能直接访问对象字段或调用对象方法。
+
+## 3. `final`：禁止改变
+
+`final` 修饰的位置不同，含义也不同：
+
+```java
+public class Constants {
+    public static final double PI = 3.1415926; // 常量：引用不能重新赋值
+}
+
+final class SafeClass {
+    // final 类不能被继承
+}
+
+class Parent {
+    final void print() {
+        System.out.println("不能被子类重写");
+    }
+}
+```
+
+- `final` 变量：只能赋值一次。
+- `final` 方法：子类不能重写。
+- `final` 类：不能被继承。
+
+对于对象，`final` 限制的是**引用不能指向另一个对象**，不代表对象内部一定不能修改：
+
+```java
+final StringBuilder text = new StringBuilder("Java");
+text.append(" 学习"); // 可以
+// text = new StringBuilder("新的内容"); // 不可以
+```
+
+## 常见组合：`private static final`
+
+它常用来定义只在当前类中使用的常量：
+
+```java
+public class AppConfig {
+    private static final int MAX_RETRY_COUNT = 3;
+}
+```
+
+- `private`：外部类不能访问；
+- `static`：属于 `AppConfig` 类，只有一份；
+- `final`：值不能再修改。
+
+## 小结
+
+记忆口诀：
+
+> `private` 管访问，`static` 管归属，`final` 管变化。
